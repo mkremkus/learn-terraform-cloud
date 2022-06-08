@@ -1,28 +1,53 @@
-provider "aws" {
-  region = var.region
-}
+# Create a single Compute Engine instance
+resource "google_compute_instance" "default" {
+  name         = "flask-vm-11"
+  machine_type = "f1-micro"
+  zone         = "us-east4-c"
+  tags         = ["ssh"]
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  metadata = {
+    enable-oslogin = "TRUE"
+  }
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-9"
+    }
   }
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
+  # Install Flask
+  metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip rsync; pip install flask"
 
-  owners = ["099720109477"] # Canonical
-}
+  network_interface {
+    network = "default"
 
-resource "aws_instance" "ubuntu" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-
-  tags = {
-    Name = var.instance_name
+    access_config {
+      # Include this section to give the VM an external IP address
+    }
   }
 }
+resource "google_compute_firewall" "ssh" {
+  name = "allow-ssh"
+  allow {
+    ports    = ["22"]
+    protocol = "tcp"
+  }
+  direction     = "INGRESS"
+  network       = "default"
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["ssh"]
+}
+resource "google_compute_firewall" "flask" {
+  name    = "flask-app-firewall"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["5000"]
+  }
+  source_ranges = ["0.0.0.0/0"]
+}// A variable for extracting the external IP address of the VM
+output "Web-server-URL" {
+ value = join("",["http://",google_compute_instance.default.network_interface.0.access_config.0.nat_ip,":5000"])
+}
+
