@@ -1,5 +1,6 @@
 # Create a single Compute Engine instance
 resource "google_compute_instance" "default" {
+  project      = "erudite-scholar-351720"
   name         = "flask-vm-12"
   machine_type = "f1-micro"
   zone         = "us-east4-c"
