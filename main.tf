@@ -28,6 +28,7 @@ resource "google_compute_instance" "default" {
 }
 
 resource "google_compute_firewall" "ssh" {
+  project      = "erudite-scholar-351720"
   name = "allow-ssh"
   allow {
     ports    = ["22"]
@@ -40,6 +41,7 @@ resource "google_compute_firewall" "ssh" {
   target_tags   = ["ssh"]
 }
 resource "google_compute_firewall" "flask" {
+  project      = "erudite-scholar-351720"  
   name    = "flask-app-firewall"
   network = "default"
 
