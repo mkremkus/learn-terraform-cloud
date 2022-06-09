@@ -14,10 +14,10 @@ resource "google_compute_instance" "default" {
       image = "debian-cloud/debian-9"
     }
   }
-/*
+
   # Install Flask
   metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential python-pip rsync; pip install flask"
-*/
+
   network_interface {
     network = "default"
 
@@ -26,7 +26,7 @@ resource "google_compute_instance" "default" {
     }
   }
 }
-/*
+
 resource "google_compute_firewall" "ssh" {
   name = "allow-ssh"
   allow {
@@ -52,4 +52,4 @@ resource "google_compute_firewall" "flask" {
 output "Web-server-URL" {
  value = join("",["http://",google_compute_instance.default.network_interface.0.access_config.0.nat_ip,":5000"])
 }
-*/
+
